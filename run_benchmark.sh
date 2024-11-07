@@ -16,6 +16,8 @@ if ! [ -f "/opt/crest/crest_ratio" ]; then
     exit 1
 fi
 
+cd /data/tmp
+
 # Run analysis
 glen=$(bash /opt/benchmark/run_ibis.sh /opt/ibis/ibis $bprefix $cpus | grep "use:" | awk '{print $5}' | cut -c 5-)
 bash /opt/benchmark/run_crest.sh /opt/crest $glen /data/tmp/tmp.bim
