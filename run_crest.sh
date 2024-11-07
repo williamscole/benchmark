@@ -23,6 +23,6 @@ ${crest_dir}/CREST_relationships.py -i ratio.csv --total_len $glen || {
 }
 
 echo "Running CREST_sex_inference.py"
-${crest_dir}/CREST_sex_inference.py -i ibis.seg -m refined_mf.simmap -b ${bim} -o crest_output.tsv -k ibis_2nd.coef || {
+${crest_dir}/CREST_sex_inference.py -i ibis.seg -m /opt/benchmark/refined_mf.simmap -b ${bim} -o crest_output.tsv -k ibis_2nd.coef || {
     exit 1
 }
