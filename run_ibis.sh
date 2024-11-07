@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ibis=${1}
 bfile=${2}
 threads=${3}
