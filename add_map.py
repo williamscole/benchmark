@@ -5,7 +5,7 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    bim_file = pd.read_csv("tmp/tmp.bim", delim_whitespace=True, header=None)
+    bim_file = pd.read_csv("/opt/tmp/tmp.bim", delim_whitespace=True, header=None)
 
     map_file = pd.read_csv("g37.txt.gz", delim_whitespace=True, header=None)
 
