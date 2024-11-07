@@ -6,6 +6,8 @@ crest_dir=${1}
 glen=${2}
 bim=${3}
 
+cd /data/tmp
+
 echo "Individual1     Individual2     Kinship_Coefficient     IBD2_Fraction   Segment_Count   Degree" > ibis_2nd.coef
 
 cat ibis.coef | awk '{ if ($6 < 4 && $6 > 0) print }' >> ibis_2nd.coef || {
