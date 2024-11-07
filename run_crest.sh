@@ -1,12 +1,7 @@
 #!/bin/bash
-
-# Exit on any error
 set -e
-
-# Print commands as they are executed (optional, helpful for debugging)
 set -x
 
-# Store arguments
 crest_dir=${1}
 glen=${2}
 bim=${3}
@@ -31,5 +26,3 @@ echo "Running CREST_sex_inference.py"
 ${crest_dir}/CREST_sex_inference.py -i ibis.seg -m refined_mf.simmap -b ${bim} -o crest_output.tsv -k ibis_2nd.coef || {
     exit 1
 }
-
-echo "Done"
