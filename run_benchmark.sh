@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Available CPUs
-cpus=16
-
-bprefix="tmp/tmp"
+bprefix=${1}
+cpus=${2}
 
 # Check for ibis executable
 if ! [ -f "ibis/ibis" ]; then
