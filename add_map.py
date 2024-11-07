@@ -27,4 +27,4 @@ if __name__ == "__main__":
 
     out_bim = pd.concat(tmp_list)
 
-    out_bim.to_csv("tmp/tmp.bim", index=False, header=False, sep="\t")
+    out_bim.to_csv("/data/tmp/tmp.bim", index=False, header=False, sep="\t")
