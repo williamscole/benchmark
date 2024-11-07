@@ -1,0 +1,146 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+%environment
+    export LC_ALL=C
+    export PATH=/opt/conda/bin:/opt/benchmark:/opt/ibis:/opt/crest:/opt/plink2:$PATH
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate crest_env
+
+%post
+    # Avoid interactive prompts during package installation
+    export DEBIAN_FRONTEND=noninteractive
+    
+    # Install system dependencies
+    apt-get update && apt-get install -y \
+        build-essential \
+        wget \
+        git \
+        zlib1g-dev \
+        python3 \
+        python3-pip \
+        curl \
+        make \
+        gcc \
+        g++ \
+        ctags \
+        libgomp1 \
+        pkg-config \
+        autoconf \
+        automake \
+        libtool \
+        zlib1g \
+        gfortran \
+        libomp-dev \
+        unzip \
+        ca-certificates
+
+    # Install PLINK2
+    cd /opt
+    mkdir -p plink2
+    cd plink2
+    wget https://s3.amazonaws.com/plink2-assets/alpha5/plink2_linux_amd_avx2_20241020.zip
+    unzip plink2_linux_amd_avx2_20241020.zip
+    rm plink2_linux_amd_avx2_20241020.zip
+    chmod +x plink2
+    
+    # Install Miniconda and set up environment
+    cd /opt
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+    bash miniconda.sh -b -p /opt/conda
+    rm miniconda.sh
+    
+    # Add conda to path
+    export PATH=/opt/conda/bin:$PATH
+    
+    # Create and activate environment with specific versions
+    conda create -n crest_env python=3.8 -y
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate crest_env
+    
+    # Install required Python packages with specific versions
+    conda install -y scikit-learn=0.23.2 numpy=1.19.2 pandas=1.1.3
+
+    # Clone benchmark repository
+    cd /opt
+    git clone https://github.com/williamscole/benchmark.git
+    cd benchmark
+    unzip refined_mf.simmap.zip
+    
+    # Clone and build IBIS
+    cd /opt
+    git clone --recurse-submodules https://github.com/williamslab/ibis.git
+    cd ibis
+    # Ensure OpenMP threading is available
+    export CFLAGS="-fopenmp ${CFLAGS}"
+    export CXXFLAGS="-fopenmp ${CXXFLAGS}"
+    # Build with all cores available
+    make -j$(nproc)
+    
+    # Clone and build CREST
+    cd /opt
+    git clone https://github.com/williamslab/crest.git
+    cd crest
+    make -j$(nproc)
+
+    # Create working directory
+    mkdir -p /data
+
+    # Verify installations and set permissions
+    chmod -R +x /opt/benchmark/*.sh
+    chmod -R +x /opt/benchmark/*.py
+    
+    # Test if executables were built properly
+    if [ ! -f /opt/ibis/ibis ]; then
+        echo "IBIS build failed"
+        exit 1
+    fi
+    if [ ! -f /opt/crest/crest_ratio ]; then
+        echo "CREST build failed"
+        exit 1
+    fi
+    if [ ! -f /opt/plink2/plink2 ]; then
+        echo "PLINK2 installation failed"
+        exit 1
+    fi
+
+%runscript
+    exec /opt/benchmark/run_benchmark.sh "$@"
+
+%test
+    # Test Python environment
+    python3 -c "import numpy; import pandas; import sklearn"
+    
+    # Test IBIS installation
+    /opt/ibis/ibis -h || true
+    
+    # Test CREST installation
+    /opt/crest/crest_ratio -h || true
+    
+    # Test PLINK2 installation
+    /opt/plink2/plink2 --version || true
+
+%help
+    This container provides an environment for running IBIS and CREST analysis pipelines.
+    
+    Usage:
+    apptainer run --bind /path/to/data:/data container.sif
+    
+    The container includes:
+    - IBIS (Identity By Inherited State) tool
+    - CREST (Close RElative inference using Segment sharing paTterns) tool
+    - PLINK2 (version from 20241020)
+    - Python 3.8 with required packages (scikit-learn 0.23.2, numpy 1.19.2, pandas 1.1.3)
+    - Benchmark scripts from https://github.com/williamscole/benchmark
+    
+    All benchmark scripts are available in /opt/benchmark/
+    PLINK2 is available in /opt/plink2/
+    
+    Build Requirements:
+    - OpenMP support (libgomp1, libomp-dev)
+    - C++20 support (for IBIS -std=c++2a flag)
+    - zlib development files
+    - Build essentials (make, gcc, g++)
+    
+    The container verifies all builds during construction and includes a test
+    section to validate the installation.
