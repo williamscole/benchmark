@@ -1,38 +1,33 @@
 #!/bin/bash
 
-bprefix=${1}
-cpus=${2}
+# Available CPUs
+cpus=${1}
 
-# Check for ibis executable
-if ! [ -f "ibis/ibis" ]; then
-    git clone --recurse-submodules https://github.com/williamslab/ibis.git
-    cd ibis/
-    make
-    cd ..
-else
-    echo "Found existing ibis executable"
+bprefix="/data/tmp/tmp"  # Updated path
+
+# Rest of script remains the same but uses absolute paths
+if ! [ -f "/opt/ibis/ibis" ]; then
+    echo "IBIS not found"
+    exit 1
 fi
 
-# Check for crest executable
-if ! [ -f "crest/crest_ratio" ]; then
-    git clone https://github.com/williamslab/crest
-    cd crest/
-    make
-    cd ..
-else
-    echo "Found existing crest executable"
+if ! [ -f "/opt/crest/crest_ratio" ]; then
+    echo "CREST not found"
+    exit 1
 fi
 
-# Rest of the script remains the same
-glen=$(bash run_ibis.sh ibis/ibis $bprefix $cpus | grep "use:" | awk '{print $5}' | cut -c 5-)
-bash run_crest.sh crest $glen ${bprefix}.bim
+# Run analysis
+glen=$(bash /opt/benchmark/run_ibis.sh /opt/ibis/ibis $bprefix $cpus | grep "use:" | awk '{print $5}' | cut -c 5-)
+bash /opt/benchmark/run_crest.sh /opt/crest $glen /data/tmp/tmp.bim
+
+# Move results to output directory
 gzip relationships.csv
 gzip ratio.csv
 gzip ibis_2nd.coef
 gzip ibis.coef
 gzip crest_output.tsv
-mkdir -p results
-mv *csv.gz results
-mv *coef.gz results
-mv *tsv.gz results
-echo "Done! All results are in results/"
+mkdir -p /data/results
+mv *csv.gz /data/results
+mv *coef.gz /data/results
+mv *tsv.gz /data/results
+echo "Done! All results are in /data/results/"
