@@ -15,7 +15,7 @@ cat ibis.coef | awk '{ if ($6 < 4 && $6 > 0) print }' >> ibis_2nd.coef || {
 }
 
 echo "Running crest_ratio"
-${crest_dir}/crest_ratio -i ibis.seg -r ibis_2nd.coef -o ratio || {
+${crest_dir}/crest_ratio -i ibis.seg -r ibis_2nd.coef -o ratio --ibd2 1 --pc --kinship_lw 0 --kinship_up 1  || {
     exit 1
 }
 
