@@ -6,4 +6,4 @@ threads=${3}
 
 cd /data/tmp
 
-$ibis -b $bfile -t $threads -printCoef
+$ibis -b $bfile -t $threads -printCoef -ibd2
