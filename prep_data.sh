@@ -20,4 +20,4 @@ else
     cp "${bfile}.fam" "/data/tmp/tmp.fam"
 fi
 
-python3 /opt/benchmark/add_map.py
+/opt/conda/envs/crest_env/bin/python3 /opt/benchmark/add_map.py
