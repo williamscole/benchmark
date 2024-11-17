@@ -1,26 +1,36 @@
 #!/bin/bash
 
-# Available CPUs
 cpus=${1}
+BASE_PATH=${2:-/}  # If $2 is not set, use /
 
-bprefix="/data/tmp/tmp"  # Updated path
-
-# Rest of script remains the same but uses absolute paths
-if ! [ -f "/opt/ibis/ibis" ]; then
-    echo "IBIS not found"
+if [ -z "$cpus" ]; then
+    echo "Usage: $0 cpus [BASE_PATH]"
+    echo "  cpus: number of CPU threads to use"
+    echo "  BASE_PATH: optional base path containing opt/ and data/ (defaults to /)"
     exit 1
 fi
 
-if ! [ -f "/opt/crest/crest_ratio" ]; then
-    echo "CREST not found"
+# Remove trailing slash if present
+BASE_PATH=${BASE_PATH%/}
+
+bprefix="${BASE_PATH}/data/tmp/tmp"
+
+# Check for required executables
+if ! [ -f "${BASE_PATH}/opt/ibis/ibis" ]; then
+    echo "IBIS not found at ${BASE_PATH}/opt/ibis/ibis"
     exit 1
 fi
 
-cd /data/tmp
+if ! [ -f "${BASE_PATH}/opt/crest/crest_ratio" ]; then
+    echo "CREST not found at ${BASE_PATH}/opt/crest/crest_ratio"
+    exit 1
+fi
+
+cd "${BASE_PATH}/data/tmp"
 
 # Run analysis
-glen=$(bash /opt/benchmark/run_ibis.sh /opt/ibis/ibis $bprefix $cpus | grep "use:" | awk '{print $5}' | cut -c 5-)
-bash /opt/benchmark/run_crest.sh /opt/crest $glen /data/tmp/tmp.bim
+glen=$(bash "${BASE_PATH}/opt/benchmark/run_ibis.sh" $cpus "${BASE_PATH}" $bprefix | grep "use:" | awk '{print $5}' | cut -c 5-)
+bash "${BASE_PATH}/opt/benchmark/run_crest.sh" "${BASE_PATH}" $glen "${BASE_PATH}/data/tmp/tmp.bim"
 
 # Move results to output directory
 gzip relationships.csv
@@ -28,8 +38,8 @@ gzip ratio.csv
 gzip ibis_2nd.coef
 gzip ibis.coef
 gzip crest_output.tsv
-mkdir -p /data/results
-mv *csv.gz /data/results
-mv *coef.gz /data/results
-mv *tsv.gz /data/results
-echo "Done! All results are in /data/results/"
+mkdir -p "${BASE_PATH}/data/results"
+mv *csv.gz "${BASE_PATH}/data/results"
+mv *coef.gz "${BASE_PATH}/data/results"
+mv *tsv.gz "${BASE_PATH}/data/results"
+echo "Done! All results are in ${BASE_PATH}/data/results/"
