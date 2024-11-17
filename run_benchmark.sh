@@ -29,8 +29,8 @@ fi
 cd "${BASE_PATH}/data/tmp"
 
 # Run analysis
-glen=$(bash "${BASE_PATH}/opt/benchmark/run_ibis.sh" "${BASE_PATH}/opt/ibis/ibis" $bprefix $cpus | grep "use:" | awk '{print $5}' | cut -c 5-)
-bash "${BASE_PATH}/opt/benchmark/run_crest.sh" "${BASE_PATH}/opt/crest" $glen "${BASE_PATH}/data/tmp/tmp.bim"
+glen=$(bash "${BASE_PATH}/opt/benchmark/run_ibis.sh" "${BASE_PATH}/opt/ibis/ibis" $bprefix $cpus "${BASE_PATH}" | grep "use:" | awk '{print $5}' | cut -c 5-)
+bash "${BASE_PATH}/opt/benchmark/run_crest.sh" "${BASE_PATH}/opt/crest" $glen "${BASE_PATH}/data/tmp/tmp.bim" "${BASE_PATH}"
 
 # Move results to output directory
 gzip relationships.csv
