@@ -1,5 +1,4 @@
 #!/bin/bash
-
 cpus=${1}
 BASE_PATH=${2:-/}  # If $2 is not set, use /
 
@@ -12,7 +11,6 @@ fi
 
 # Remove trailing slash if present
 BASE_PATH=${BASE_PATH%/}
-
 bprefix="${BASE_PATH}/data/tmp/tmp"
 
 # Check for required executables
@@ -28,9 +26,30 @@ fi
 
 cd "${BASE_PATH}/data/tmp"
 
-# Run analysis
+# Run analysis with timing
+echo "Starting IBIS analysis..."
+IBIS_START=$(date +%s)
 glen=$(bash "${BASE_PATH}/opt/benchmark/run_ibis.sh" "${BASE_PATH}/opt/ibis/ibis" $bprefix $cpus "${BASE_PATH}" | grep "use:" | awk '{print $5}' | cut -c 5-)
+IBIS_END=$(date +%s)
+IBIS_TIME=$((IBIS_END - IBIS_START))
+
+echo "Starting CREST analysis..."
+CREST_START=$(date +%s)
 bash "${BASE_PATH}/opt/benchmark/run_crest.sh" "${BASE_PATH}/opt/crest" $glen "${BASE_PATH}/data/tmp/tmp.bim" "${BASE_PATH}"
+CREST_END=$(date +%s)
+CREST_TIME=$((CREST_END - CREST_START))
+
+# Create timing report
+TOTAL_TIME=$((IBIS_TIME + CREST_TIME))
+cat << EOF > timing_report.txt
+Benchmark Timing Report
+----------------------
+IBIS Time:  ${IBIS_TIME} seconds ($(printf "%.2f" $(echo "scale=2; ${IBIS_TIME}/60" | bc)) minutes)
+CREST Time: ${CREST_TIME} seconds ($(printf "%.2f" $(echo "scale=2; ${CREST_TIME}/60" | bc)) minutes)
+Total Time: ${TOTAL_TIME} seconds ($(printf "%.2f" $(echo "scale=2; ${TOTAL_TIME}/60" | bc)) minutes)
+CPUs Used:  ${cpus}
+Date:       $(date)
+EOF
 
 # Move results to output directory
 gzip -f relationships.csv
@@ -42,4 +61,5 @@ mkdir -p "${BASE_PATH}/data/results"
 mv *csv.gz "${BASE_PATH}/data/results"
 mv *coef.gz "${BASE_PATH}/data/results"
 mv *tsv.gz "${BASE_PATH}/data/results"
+mv timing_report.txt "${BASE_PATH}/data/results"
 echo "Done! All results are in ${BASE_PATH}/data/results/"
