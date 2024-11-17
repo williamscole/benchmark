@@ -33,11 +33,11 @@ glen=$(bash "${BASE_PATH}/opt/benchmark/run_ibis.sh" "${BASE_PATH}/opt/ibis/ibis
 bash "${BASE_PATH}/opt/benchmark/run_crest.sh" "${BASE_PATH}/opt/crest" $glen "${BASE_PATH}/data/tmp/tmp.bim" "${BASE_PATH}"
 
 # Move results to output directory
-gzip relationships.csv
-gzip ratio.csv
-gzip ibis_2nd.coef
-gzip ibis.coef
-gzip crest_output.tsv
+gzip -f relationships.csv
+gzip -f ratio.csv
+gzip -f ibis_2nd.coef
+gzip -f ibis.coef
+gzip -f crest_output.tsv
 mkdir -p "${BASE_PATH}/data/results"
 mv *csv.gz "${BASE_PATH}/data/results"
 mv *coef.gz "${BASE_PATH}/data/results"
