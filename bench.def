@@ -33,6 +33,7 @@ From: ubuntu:20.04
         gfortran \
         libomp-dev \
         unzip \
+        bc \
         ca-certificates
 
     # Install PLINK2
