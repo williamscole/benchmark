@@ -7,6 +7,13 @@ BASE_PATH=${4:-/}  # Optional base path, defaults to /
 
 cd "${BASE_PATH}/data/tmp"
 
+if [[ -f params.txt ]]
+then
+kinship_rel_lw=$(head -1 params.txt | awk '{print $2}')
+else
+kinship_rel_lw="0.0055243"
+fi
+
 echo "Individual1     Individual2     Kinship_Coefficient     IBD2_Fraction   Segment_Count   Degree" > ibis_2nd.coef
 
 cat ibis.coef | awk '{ if ($6 < 4 && $6 > 0) print }' >> ibis_2nd.coef || {
@@ -14,7 +21,7 @@ cat ibis.coef | awk '{ if ($6 < 4 && $6 > 0) print }' >> ibis_2nd.coef || {
 }
 
 echo "Running crest_ratio"
-${crest_dir}/crest_ratio -i ibis.seg -r ibis.coef -o ratio --ibd2 0.17 --pc --kinship_lw 0.05 --kinship_up 0.25 || {
+${crest_dir}/crest_ratio -i ibis.seg -r ibis.coef -o ratio --kinship_rel_lw $kinship_rel_lw --ibd2 0.17 --pc --kinship_lw 0.05 --kinship_up 0.25 || {
     exit 1
 }
 
