@@ -9,6 +9,7 @@ cd "${BASE_PATH}/data/tmp"
 
 if [[ -f params.txt ]]
 then
+echo "Parameter file found."
 kinship_rel_lw=$(head -1 params.txt | awk '{print $2}')
 else
 kinship_rel_lw="0.0055243"
